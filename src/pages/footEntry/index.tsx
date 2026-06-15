@@ -61,7 +61,7 @@ const FootEntryPage: React.FC = () => {
     };
 
     console.info('[FootEntry] 保存脚型数据:', footData);
-    setCurrentFoot(footData);
+    setCurrentFoot(footData, true);
     addRecentFoot(footData);
     Taro.showToast({ title: '录入成功', icon: 'success' });
     setTimeout(() => {

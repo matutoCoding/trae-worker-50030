@@ -288,19 +288,24 @@ interface ShoeStore {
   archives: CustomerArchive[];
   patternLibrary: PatternLibrary[];
   recentFoots: FootMeasurement[];
+  lastSavedArchiveId: string | null;
   initialized: boolean;
   initStorage: () => Promise<void>;
-  setCurrentFoot: (foot: FootMeasurement) => void;
+  setCurrentFoot: (foot: FootMeasurement, clearFitResult?: boolean) => void;
   setCurrentFitResult: (result: LastFitResult) => void;
+  clearCurrentFitResult: () => void;
   addRecentFoot: (foot: FootMeasurement) => void;
   addArchive: (archive: CustomerArchive) => void;
   saveOrUpdateArchive: (foot: FootMeasurement, fitResult: LastFitResult) => CustomerArchive;
+  clearLastSavedArchiveId: () => void;
   updateArchive: (id: string, archive: Partial<CustomerArchive>) => void;
   deleteArchive: (id: string) => void;
   addToLibrary: (pattern: PatternLibrary) => void;
   removeFromLibrary: (id: string) => void;
   incrementUsage: (id: string) => void;
   applyPattern: (pattern: PatternLibrary) => void;
+  duplicatePattern: (patternId: string) => PatternLibrary | null;
+  updateLibraryPattern: (id: string, updates: Partial<PatternLibrary>) => void;
 }
 
 export const useShoeStore = create<ShoeStore>((set, get) => ({
@@ -309,6 +314,7 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
   archives: defaultArchives,
   patternLibrary: defaultLibrary,
   recentFoots: [],
+  lastSavedArchiveId: null,
   initialized: false,
 
   initStorage: async () => {
@@ -354,14 +360,25 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
     });
   },
 
-  setCurrentFoot: (foot) => {
-    set({ currentFoot: foot });
-    saveToStorage(STORAGE_KEY_CURRENT_FOOT, foot);
+  setCurrentFoot: (foot, clearFitResult) => {
+    if (clearFitResult) {
+      set({ currentFoot: foot, currentFitResult: null });
+      saveToStorage(STORAGE_KEY_CURRENT_FOOT, foot);
+      saveToStorage(STORAGE_KEY_CURRENT_FIT, null);
+    } else {
+      set({ currentFoot: foot });
+      saveToStorage(STORAGE_KEY_CURRENT_FOOT, foot);
+    }
   },
 
   setCurrentFitResult: (result) => {
     set({ currentFitResult: result });
     saveToStorage(STORAGE_KEY_CURRENT_FIT, result);
+  },
+
+  clearCurrentFitResult: () => {
+    set({ currentFitResult: null });
+    saveToStorage(STORAGE_KEY_CURRENT_FIT, null);
   },
 
   addRecentFoot: (foot) => {
@@ -383,23 +400,25 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
       a => a.customerName === foot.customerName
     );
 
+    let savedArchive: CustomerArchive;
+
     if (existingIndex >= 0) {
       const existing = archives[existingIndex];
       const updatedArchive: CustomerArchive = {
         ...existing,
         footMeasurements: [foot, ...existing.footMeasurements.filter(f => f.id !== foot.id)],
-        lastFitResults: [fitResult, ...existing.lastFitResults.slice(0, 4)],
+        lastFitResults: [fitResult, ...existing.lastFitResults.slice(0, 9)],
         riskWarnings: fitResult.riskWarnings.length > 0
-          ? [...fitResult.riskWarnings, ...existing.riskWarnings.slice(0, 3)]
+          ? [...fitResult.riskWarnings, ...existing.riskWarnings.slice(0, 5)]
           : existing.riskWarnings,
         updatedAt: getTodayStr()
       };
       const updated = [...archives];
       updated[existingIndex] = updatedArchive;
-      set({ archives: updated });
+      savedArchive = updatedArchive;
+      set({ archives: updated, lastSavedArchiveId: updatedArchive.id });
       saveToStorage(STORAGE_KEY_ARCHIVES, updated);
       console.info('[Archive] 已追加到已有档案:', foot.customerName);
-      return updatedArchive;
     } else {
       const newArchive: CustomerArchive = {
         id: generateId(),
@@ -411,12 +430,17 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
         createdAt: getTodayStr(),
         updatedAt: getTodayStr()
       };
+      savedArchive = newArchive;
       const updated = [newArchive, ...archives];
-      set({ archives: updated });
+      set({ archives: updated, lastSavedArchiveId: newArchive.id });
       saveToStorage(STORAGE_KEY_ARCHIVES, updated);
       console.info('[Archive] 已创建新档案:', foot.customerName);
-      return newArchive;
     }
+    return savedArchive;
+  },
+
+  clearLastSavedArchiveId: () => {
+    set({ lastSavedArchiveId: null });
   },
 
   updateArchive: (id, updates) => {
@@ -482,5 +506,33 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
     get().addRecentFoot(foot);
 
     console.info('[Pattern] 版型已应用:', pattern.name);
+  },
+
+  duplicatePattern: (patternId) => {
+    const { patternLibrary } = get();
+    const original = patternLibrary.find(p => p.id === patternId);
+    if (!original) return null;
+
+    const duplicated: PatternLibrary = {
+      ...original,
+      id: generateId(),
+      name: original.name + ' (副本)',
+      createdAt: getTodayStr(),
+      usageCount: 0
+    };
+
+    const updated = [duplicated, ...patternLibrary];
+    set({ patternLibrary: updated });
+    saveToStorage(STORAGE_KEY_LIBRARY, updated);
+    console.info('[Pattern] 版型已复制为新版本:', duplicated.name);
+    return duplicated;
+  },
+
+  updateLibraryPattern: (id, updates) => {
+    const updated = get().patternLibrary.map(p =>
+      p.id === id ? { ...p, ...updates } : p
+    );
+    set({ patternLibrary: updated });
+    saveToStorage(STORAGE_KEY_LIBRARY, updated);
   }
 }));

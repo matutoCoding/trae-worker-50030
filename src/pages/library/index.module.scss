@@ -60,6 +60,120 @@
   border-color: $color-primary;
 }
 
+.filterSection {
+  margin: 0 $page-padding $spacing-sm;
+}
+
+.filterLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-xs;
+  padding-left: $spacing-xs;
+}
+
+.filterRow {
+  display: flex;
+  gap: $spacing-xs;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.sortBar {
+  margin: 0 $page-padding $spacing-md;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.sortLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.sortSelect {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  display: flex;
+  align-items: center;
+}
+
+.sortArrow {
+  margin-left: 4rpx;
+  font-size: $font-size-xs;
+}
+
+.detailActions {
+  margin-top: $spacing-md;
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.detailApplyBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.detailCopyBtn {
+  @include button-reset;
+  height: $button-height-lg;
+  padding: 0 $spacing-lg;
+  background: $color-tag-bg;
+  color: $color-primary;
+  font-size: $font-size-md;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-border;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.patternCardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: $spacing-sm;
+}
+
+.patternMeta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.patternMetaTag {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.patternActions {
+  display: flex;
+  gap: $spacing-xs;
+}
+
 .patternList {
   padding: 0 $page-padding;
 }

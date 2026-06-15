@@ -321,6 +321,234 @@
   line-height: 1.6;
 }
 
+.bottomActions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  background: $color-bg-card;
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: $spacing-md;
+  z-index: 100;
+}
+
+.btnProduce {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.productionModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index:  300;
+}
+
+.productionContent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $color-bg-page;
+  overflow-y: auto;
+  padding-bottom: calc(#{$spacing-xl} + env(safe-area-inset-bottom));
+}
+
+.productionHeader {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  padding: $spacing-lg $page-padding;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.productionHeaderTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+}
+
+.productionHeaderSub {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 4rpx;
+}
+
+.productionClose {
+  background: rgba(255, 255, 255, 0.2);
+  color: $color-text-white;
+  border-radius: 50%;
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-lg;
+}
+
+.productionBody {
+  padding: $spacing-md $page-padding;
+}
+
+.productionCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.productionCardTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-sm;
+  border-bottom: 2rpx solid $color-divider;
+  display: flex;
+  align-items: center;
+}
+
+.productionCardTitleIcon {
+  margin-right: $spacing-xs;
+}
+
+.productionInfoRow {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-xs 0;
+}
+
+.productionInfoLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.productionInfoValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.productionTable {
+  margin-top: $spacing-sm;
+}
+
+.productionTableHeader {
+  display: flex;
+  background: $color-measure-bg;
+  border-radius: $radius-sm $radius-sm 0 0;
+  padding: $spacing-sm 4rpx;
+  border-bottom: 2rpx solid $color-border;
+}
+
+.productionTableHeaderCell {
+  flex: 1;
+  text-align: center;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.productionTableRow {
+  display: flex;
+  padding: $spacing-xs 4rpx;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.productionTableRowHighlight {
+  background: rgba($color-primary, 0.06);
+}
+
+.productionTableCell {
+  flex: 1;
+  text-align: center;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.productionTableCellSize {
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.productionLeatherCard {
+  background: linear-gradient(135deg, rgba($color-primary, 0.05) 0%, $color-bg-card 100%);
+  border: 2rpx solid rgba($color-primary, 0.1);
+}
+
+.productionWarning {
+  padding: $spacing-sm;
+  background: rgba($color-error, 0.05);
+  border-radius: $radius-sm;
+  margin-bottom: $spacing-xs;
+  border-left: 4rpx solid $color-error;
+}
+
+.productionWarningText {
+  font-size: $font-size-xs;
+  color: $color-error;
+}
+
+.productionWarningOk {
+  background: rgba($color-success, 0.05);
+  border-left-color: $color-success;
+}
+
+.productionWarningOk .productionWarningText {
+  color: $color-success;
+}
+
+.productionFooter {
+  position: sticky;
+  bottom: 0;
+  background: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: $spacing-md;
+}
+
+.btnConfirm {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
 .baseInfo {
   display: flex;
   justify-content: space-between;

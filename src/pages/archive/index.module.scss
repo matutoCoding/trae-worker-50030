@@ -269,6 +269,129 @@
   margin-top: 4rpx;
 }
 
+.archiveCardHighlight {
+  background: linear-gradient(135deg, rgba($color-primary, 0.08) 0%, $color-bg-card 100%);
+  border: 2rpx solid $color-primary;
+  animation: pulseHighlight 2s ease-out;
+}
+
+@keyframes pulseHighlight {
+  0% { box-shadow: 0 0 0 0 rgba($color-primary, 0.4); }
+  70% { box-shadow: 0 0 0 16rpx rgba($color-primary, 0); }
+  100% { box-shadow: $shadow-card; }
+}
+
+.newBadge {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-xs;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-round;
+  margin-left: $spacing-sm;
+  white-space: nowrap;
+}
+
+.timeline {
+  margin-top: $spacing-lg;
+  padding-left: $spacing-md;
+  border-left: 3rpx solid $color-border;
+}
+
+.timelineItem {
+  position: relative;
+  padding: 0 0 $spacing-lg $spacing-md;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.timelineDot {
+  position: absolute;
+  left: -21rpx;
+  top: 6rpx;
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: $color-primary;
+  border: 4rpx solid $color-bg-card;
+  box-shadow: 0 0 0 2rpx $color-primary;
+}
+
+.timelineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.timelineDate {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.timelineBadge {
+  font-size: $font-size-xs;
+  padding: 2rpx 12rpx;
+  border-radius: $radius-round;
+  background: $color-tag-bg;
+  color: $color-tag-text;
+}
+
+.timelineSection {
+  background: $color-measure-bg;
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-xs;
+  border: 1rpx solid $color-measure-border;
+}
+
+.timelineSectionTitle {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.timelineRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 4rpx 0;
+}
+
+.timelineLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.timelineValue {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.timelineWarning {
+  background: rgba($color-error, 0.05);
+  border-left: 4rpx solid $color-error;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  margin-bottom: $spacing-xs;
+}
+
+.timelineWarningText {
+  font-size: $font-size-xs;
+  color: $color-error;
+}
+
+.timelineNote {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  font-style: italic;
+  padding-left: $spacing-sm;
+  border-left: 2rpx solid $color-divider;
+}
+
 .detailClose {
   @include button-reset;
   width: 100%;
