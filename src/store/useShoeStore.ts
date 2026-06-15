@@ -400,6 +400,11 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
       a => a.customerName === foot.customerName
     );
 
+    const datedFitResult: LastFitResult = {
+      ...fitResult,
+      createdAt: getTodayStr()
+    };
+
     let savedArchive: CustomerArchive;
 
     if (existingIndex >= 0) {
@@ -407,7 +412,7 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
       const updatedArchive: CustomerArchive = {
         ...existing,
         footMeasurements: [foot, ...existing.footMeasurements.filter(f => f.id !== foot.id)],
-        lastFitResults: [fitResult, ...existing.lastFitResults.slice(0, 9)],
+        lastFitResults: [datedFitResult, ...existing.lastFitResults.slice(0, 9)],
         riskWarnings: fitResult.riskWarnings.length > 0
           ? [...fitResult.riskWarnings, ...existing.riskWarnings.slice(0, 5)]
           : existing.riskWarnings,
@@ -425,7 +430,7 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
         customerName: foot.customerName,
         phone: '',
         footMeasurements: [foot],
-        lastFitResults: [fitResult],
+        lastFitResults: [datedFitResult],
         riskWarnings: fitResult.riskWarnings,
         createdAt: getTodayStr(),
         updatedAt: getTodayStr()

@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { useShoeStore } from '@/store/useShoeStore';
+import { SHOE_STYLE_LABELS } from '@/types/shoe';
 import {
   calculateGrading,
   LEATHER_TYPES,
@@ -325,7 +326,7 @@ const GradingPage: React.FC = () => {
                 </View>
                 <View className={styles.productionInfoRow}>
                   <Text className={styles.productionInfoLabel}>目标鞋款</Text>
-                  <Text className={styles.productionInfoValue}>{'款式'}</Text>
+                  <Text className={styles.productionInfoValue}>{SHOE_STYLE_LABELS[currentFoot.shoeStyle]}</Text>
                 </View>
                 <View className={styles.productionInfoRow}>
                   <Text className={styles.productionInfoLabel}>基准码</Text>
@@ -478,7 +479,7 @@ const GradingPage: React.FC = () => {
                       <Text className={styles.productionInfoValue}>{upperPattern.tongueWidth}mm</Text>
                     </View>
                   )}
-                  <View style={{ height: $spacing-md }} />
+                  <View className={styles.productionInfoGap} />
                   <View className={classnames(styles.productionWarning, styles.productionWarningOk)}>
                     <Text className={styles.productionWarningText}>
                       注意：以上为参考下料尺寸，实际下料需加放缝位8-10mm

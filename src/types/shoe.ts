@@ -44,6 +44,7 @@ export interface LastFitResult {
   deviations: FitDeviation[];
   overallFit: 'excellent' | 'good' | 'acceptable' | 'poor';
   riskWarnings: RiskWarning[];
+  createdAt?: string;
 }
 
 export interface RiskWarning {

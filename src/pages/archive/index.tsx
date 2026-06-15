@@ -94,8 +94,8 @@ const ArchivePage: React.FC = () => {
     for (let i = 0; i < maxLen; i++) {
       const foot = archive.footMeasurements[i] || null;
       const fit = archive.lastFitResults[i] || null;
-      const date = foot?.createdAt || fit ? archive.updatedAt : archive.createdAt;
-      const warnings = i === 0 ? archive.riskWarnings : [];
+      const date = foot?.createdAt || fit?.createdAt || archive.updatedAt;
+      const warnings = fit?.riskWarnings || (i === 0 ? archive.riskWarnings : []);
       events.push({ date, foot, fit, warnings });
     }
     return events;

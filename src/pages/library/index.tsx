@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, Button } from '@tarojs/components';
+import { View, Text, ScrollView, Button, Input, Textarea } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import { useShoeStore, generateId } from '@/store/useShoeStore';
-import type { PatternLibrary, ShoeStyle, ArchType, ToeShape } from '@/types/shoe';
+import type { PatternLibrary, ShoeStyle, LastDimensions } from '@/types/shoe';
 import { SHOE_STYLE_LABELS } from '@/types/shoe';
 import styles from './index.module.scss';
 
@@ -13,15 +13,32 @@ const FOOT_FILTERS: ('all' | 'normal' | 'high' | 'flat')[] = ['all', 'normal', '
 
 type SortKey = 'usage' | 'date' | 'name';
 
+interface EditState {
+  name: string;
+  description: string;
+  lastLength: string;
+  lastBallGirth: string;
+  lastInstepGirth: string;
+  lastWidth: string;
+  toeSpring: string;
+  heelSpring: string;
+  shoeSize: string;
+}
+
 const LibraryPage: React.FC = () => {
   const { patternLibrary, removeFromLibrary, applyPattern, currentFoot, currentFitResult,
-    addToLibrary, duplicatePattern } = useShoeStore();
+    addToLibrary, duplicatePattern, updateLibraryPattern } = useShoeStore();
   const [activeStyle, setActiveStyle] = useState<ShoeStyle | 'all'>('all');
   const [activeGender, setActiveGender] = useState<'all' | 'male' | 'female'>('all');
   const [activeFoot, setActiveFoot] = useState<'all' | 'normal' | 'high' | 'flat'>('all');
   const [sortKey, setSortKey] = useState<SortKey>('usage');
   const [sortAsc, setSortAsc] = useState(false);
   const [selectedPattern, setSelectedPattern] = useState<PatternLibrary | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editState, setEditState] = useState<EditState>({
+    name: '', description: '', lastLength: '', lastBallGirth: '',
+    lastInstepGirth: '', lastWidth: '', toeSpring: '', heelSpring: '', shoeSize: ''
+  });
 
   const filteredPatterns = useMemo(() => {
     let list = [...patternLibrary];
@@ -49,9 +66,24 @@ const LibraryPage: React.FC = () => {
     return list;
   }, [patternLibrary, activeStyle, activeGender, activeFoot, sortKey, sortAsc]);
 
+  const initEditState = (pattern: PatternLibrary) => {
+    setEditState({
+      name: pattern.name,
+      description: pattern.description,
+      lastLength: String(pattern.lastDimensions.lastLength),
+      lastBallGirth: String(pattern.lastDimensions.lastBallGirth),
+      lastInstepGirth: String(pattern.lastDimensions.lastInstepGirth),
+      lastWidth: String(pattern.lastDimensions.lastWidth),
+      toeSpring: String(pattern.lastDimensions.toeSpring),
+      heelSpring: String(pattern.lastDimensions.heelSpring),
+      shoeSize: String(pattern.lastDimensions.shoeSize),
+    });
+  };
+
   const handleUse = (pattern: PatternLibrary) => {
     applyPattern(pattern);
     setSelectedPattern(null);
+    setIsEditing(false);
     Taro.showToast({ title: '版型已应用', icon: 'success' });
     setTimeout(() => {
       Taro.switchTab({ url: '/pages/lastFit/index' });
@@ -77,9 +109,52 @@ const LibraryPage: React.FC = () => {
   const handleDuplicate = (pattern: PatternLibrary) => {
     const newPattern = duplicatePattern(pattern.id);
     if (newPattern) {
-      Taro.showToast({ title: '已复制为新版本', icon: 'success' });
       setSelectedPattern(newPattern);
+      initEditState(newPattern);
+      setIsEditing(true);
+      Taro.showToast({ title: '已复制为新版本', icon: 'success' });
     }
+  };
+
+  const handleEditSave = () => {
+    if (!selectedPattern || !editState.name.trim()) {
+      Taro.showToast({ title: '请填写版型名称', icon: 'none' });
+      return;
+    }
+
+    const num = (v: string) => parseFloat(v) || 0;
+
+    const newLastDimensions: LastDimensions = {
+      lastLength: num(editState.lastLength),
+      lastBallGirth: num(editState.lastBallGirth),
+      lastInstepGirth: num(editState.lastInstepGirth),
+      lastHeelGirth: selectedPattern.lastDimensions.lastHeelGirth,
+      lastWidth: num(editState.lastWidth),
+      toeSpring: num(editState.toeSpring),
+      heelSpring: num(editState.heelSpring),
+      shoeSize: num(editState.shoeSize),
+    };
+
+    updateLibraryPattern(selectedPattern.id, {
+      name: editState.name.trim(),
+      description: editState.description.trim(),
+      lastDimensions: newLastDimensions,
+    });
+
+    const updated = patternLibrary.find(p => p.id === selectedPattern.id);
+    if (updated) {
+      setSelectedPattern({ ...updated });
+    }
+
+    setIsEditing(false);
+    Taro.showToast({ title: '保存成功', icon: 'success' });
+  };
+
+  const handleCancelEdit = () => {
+    if (selectedPattern) {
+      initEditState(selectedPattern);
+    }
+    setIsEditing(false);
   };
 
   const handleAddCurrent = () => {
@@ -118,6 +193,12 @@ const LibraryPage: React.FC = () => {
   };
 
   const sortLabel = sortKey === 'usage' ? '使用次数' : sortKey === 'date' ? '创建时间' : '名称';
+
+  const handleOpenDetail = (pattern: PatternLibrary) => {
+    setSelectedPattern(pattern);
+    initEditState(pattern);
+    setIsEditing(false);
+  };
 
   return (
     <View className={styles.page}>
@@ -191,7 +272,7 @@ const LibraryPage: React.FC = () => {
       ) : (
         <ScrollView scrollY className={styles.patternList}>
           {filteredPatterns.map((pattern) => (
-            <View key={pattern.id} className={styles.patternCard} onClick={() => setSelectedPattern(pattern)}>
+            <View key={pattern.id} className={styles.patternCard} onClick={() => handleOpenDetail(pattern)}>
               <View className={styles.patternHeader}>
                 <Text className={styles.patternName}>{pattern.name}</Text>
                 <Text className={styles.patternUsage}>使用 {pattern.usageCount} 次</Text>
@@ -250,76 +331,199 @@ const LibraryPage: React.FC = () => {
       </View>
 
       {selectedPattern && (
-        <View className={styles.detailModal} onClick={() => setSelectedPattern(null)}>
+        <View className={styles.detailModal} onClick={() => { setSelectedPattern(null); setIsEditing(false); }}>
           <View className={styles.detailContent} onClick={(e) => e.stopPropagation()}>
             <View className={styles.detailHandle} />
-            <Text className={styles.detailTitle}>{selectedPattern.name}</Text>
-            <Text className={styles.detailDesc}>{selectedPattern.description}</Text>
 
-            <View className={styles.detailSection}>
-              <Text className={styles.detailSectionTitle}>脚型数据</Text>
-              <View className={styles.detailRow}>
-                <Text className={styles.detailLabel}>脚长</Text>
-                <Text className={styles.detailValue}>{selectedPattern.footMeasurement.footLength}mm</Text>
-              </View>
-              <View className={styles.detailRow}>
-                <Text className={styles.detailLabel}>跖围</Text>
-                <Text className={styles.detailValue}>{selectedPattern.footMeasurement.ballGirth}mm</Text>
-              </View>
-              <View className={styles.detailRow}>
-                <Text className={styles.detailLabel}>脚背高度</Text>
-                <Text className={styles.detailValue}>{selectedPattern.footMeasurement.instepHeight}mm</Text>
-              </View>
-              <View className={styles.detailRow}>
-                <Text className={styles.detailLabel}>足弓</Text>
-                <Text className={styles.detailValue}>
-                  {selectedPattern.footMeasurement.archType === 'high' ? '高足弓' : selectedPattern.footMeasurement.archType === 'flat' ? '扁平足' : '正常足弓'}
-                </Text>
-              </View>
-            </View>
+            {isEditing ? (
+              <>
+                <Text className={styles.detailTitle}>编辑版型</Text>
 
-            <View className={styles.detailSection}>
-              <Text className={styles.detailSectionTitle}>楦型尺寸</Text>
-              <View className={styles.detailRow}>
-                <Text className={styles.detailLabel}>楦底长</Text>
-                <Text className={styles.detailValue}>{selectedPattern.lastDimensions.lastLength}mm</Text>
-              </View>
-              <View className={styles.detailRow}>
-                <Text className={styles.detailLabel}>楦跖围</Text>
-                <Text className={styles.detailValue}>{selectedPattern.lastDimensions.lastBallGirth}mm</Text>
-              </View>
-              <View className={styles.detailRow}>
-                <Text className={styles.detailLabel}>楦背围</Text>
-                <Text className={styles.detailValue}>{selectedPattern.lastDimensions.lastInstepGirth}mm</Text>
-              </View>
-              <View className={styles.detailRow}>
-                <Text className={styles.detailLabel}>楦宽</Text>
-                <Text className={styles.detailValue}>{selectedPattern.lastDimensions.lastWidth}mm</Text>
-              </View>
-              <View className={styles.detailRow}>
-                <Text className={styles.detailLabel}>前跷 / 后跷</Text>
-                <Text className={styles.detailValue}>
-                  {selectedPattern.lastDimensions.toeSpring} / {selectedPattern.lastDimensions.heelSpring}mm
-                </Text>
-              </View>
-              <View className={styles.detailRow}>
-                <Text className={styles.detailLabel}>基准码</Text>
-                <Text className={styles.detailValue}>{selectedPattern.lastDimensions.shoeSize}码</Text>
-              </View>
-            </View>
+                <View className={styles.detailSection}>
+                  <Text className={styles.detailSectionTitle}>基本信息</Text>
+                  <View className={styles.editRow}>
+                    <Text className={styles.editLabel}>版型名称</Text>
+                    <Input
+                      className={styles.editInput}
+                      value={editState.name}
+                      onInput={(e) => setEditState(s => ({ ...s, name: e.detail.value }))}
+                      placeholder='请输入版型名称'
+                    />
+                  </View>
+                  <View className={styles.editRow}>
+                    <Text className={styles.editLabel}>描述</Text>
+                    <Textarea
+                      className={styles.editTextarea}
+                      value={editState.description}
+                      onInput={(e) => setEditState(s => ({ ...s, description: e.detail.value }))}
+                      placeholder='请输入版型描述'
+                    />
+                  </View>
+                </View>
 
-            <View className={styles.detailActions}>
-              <Button className={styles.detailCopyBtn} onClick={() => handleDuplicate(selectedPattern)}>
-                📋 复制
-              </Button>
-              <Button className={styles.detailApplyBtn} onClick={() => handleUse(selectedPattern)}>
-                应用此版型
-              </Button>
-            </View>
+                <View className={styles.detailSection}>
+                  <Text className={styles.detailSectionTitle}>楦型尺寸（可微调）</Text>
+                  <View className={styles.editGrid}>
+                    <View className={styles.editItem}>
+                      <Text className={styles.editItemLabel}>楦底长(mm)</Text>
+                      <Input
+                        type='digit'
+                        className={styles.editItemInput}
+                        value={editState.lastLength}
+                        onInput={(e) => setEditState(s => ({ ...s, lastLength: e.detail.value }))}
+                      />
+                    </View>
+                    <View className={styles.editItem}>
+                      <Text className={styles.editItemLabel}>楦跖围(mm)</Text>
+                      <Input
+                        type='digit'
+                        className={styles.editItemInput}
+                        value={editState.lastBallGirth}
+                        onInput={(e) => setEditState(s => ({ ...s, lastBallGirth: e.detail.value }))}
+                      />
+                    </View>
+                    <View className={styles.editItem}>
+                      <Text className={styles.editItemLabel}>楦背围(mm)</Text>
+                      <Input
+                        type='digit'
+                        className={styles.editItemInput}
+                        value={editState.lastInstepGirth}
+                        onInput={(e) => setEditState(s => ({ ...s, lastInstepGirth: e.detail.value }))}
+                      />
+                    </View>
+                    <View className={styles.editItem}>
+                      <Text className={styles.editItemLabel}>楦宽(mm)</Text>
+                      <Input
+                        type='digit'
+                        className={styles.editItemInput}
+                        value={editState.lastWidth}
+                        onInput={(e) => setEditState(s => ({ ...s, lastWidth: e.detail.value }))}
+                      />
+                    </View>
+                    <View className={styles.editItem}>
+                      <Text className={styles.editItemLabel}>前跷(mm)</Text>
+                      <Input
+                        type='digit'
+                        className={styles.editItemInput}
+                        value={editState.toeSpring}
+                        onInput={(e) => setEditState(s => ({ ...s, toeSpring: e.detail.value }))}
+                      />
+                    </View>
+                    <View className={styles.editItem}>
+                      <Text className={styles.editItemLabel}>后跷(mm)</Text>
+                      <Input
+                        type='digit'
+                        className={styles.editItemInput}
+                        value={editState.heelSpring}
+                        onInput={(e) => setEditState(s => ({ ...s, heelSpring: e.detail.value }))}
+                      />
+                    </View>
+                    <View className={styles.editItem}>
+                      <Text className={styles.editItemLabel}>基准码</Text>
+                      <Input
+                        type='digit'
+                        className={styles.editItemInput}
+                        value={editState.shoeSize}
+                        onInput={(e) => setEditState(s => ({ ...s, shoeSize: e.detail.value }))}
+                      />
+                    </View>
+                  </View>
+                </View>
 
-            <Button className={styles.detailClose} onClick={() => setSelectedPattern(null)}>
-              关闭
-            </Button>
+                <View className={styles.detailActions}>
+                  <Button className={styles.detailCopyBtn} onClick={handleCancelEdit}>
+                    取消
+                  </Button>
+                  <Button className={styles.detailApplyBtn} onClick={handleEditSave}>
+                    保存版型
+                  </Button>
+                </View>
+              </>
+            ) : (
+              <>
+                <Text className={styles.detailTitle}>{selectedPattern.name}</Text>
+                <Text className={styles.detailDesc}>{selectedPattern.description}</Text>
+
+                <View className={styles.detailSection}>
+                  <Text className={styles.detailSectionTitle}>脚型数据</Text>
+                  <View className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>脚长</Text>
+                    <Text className={styles.detailValue}>{selectedPattern.footMeasurement.footLength}mm</Text>
+                  </View>
+                  <View className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>跖围</Text>
+                    <Text className={styles.detailValue}>{selectedPattern.footMeasurement.ballGirth}mm</Text>
+                  </View>
+                  <View className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>脚背高度</Text>
+                    <Text className={styles.detailValue}>{selectedPattern.footMeasurement.instepHeight}mm</Text>
+                  </View>
+                  <View className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>足弓</Text>
+                    <Text className={styles.detailValue}>
+                      {selectedPattern.footMeasurement.archType === 'high' ? '高足弓' : selectedPattern.footMeasurement.archType === 'flat' ? '扁平足' : '正常足弓'}
+                    </Text>
+                  </View>
+                  <View className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>鞋款</Text>
+                    <Text className={styles.detailValue}>{SHOE_STYLE_LABELS[selectedPattern.shoeStyle]}</Text>
+                  </View>
+                  <View className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>使用次数</Text>
+                    <Text className={styles.detailValue}>{selectedPattern.usageCount} 次</Text>
+                  </View>
+                </View>
+
+                <View className={styles.detailSection}>
+                  <Text className={styles.detailSectionTitle}>楦型尺寸</Text>
+                  <View className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>楦底长</Text>
+                    <Text className={styles.detailValue}>{selectedPattern.lastDimensions.lastLength}mm</Text>
+                  </View>
+                  <View className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>楦跖围</Text>
+                    <Text className={styles.detailValue}>{selectedPattern.lastDimensions.lastBallGirth}mm</Text>
+                  </View>
+                  <View className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>楦背围</Text>
+                    <Text className={styles.detailValue}>{selectedPattern.lastDimensions.lastInstepGirth}mm</Text>
+                  </View>
+                  <View className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>楦宽</Text>
+                    <Text className={styles.detailValue}>{selectedPattern.lastDimensions.lastWidth}mm</Text>
+                  </View>
+                  <View className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>前跷 / 后跷</Text>
+                    <Text className={styles.detailValue}>
+                      {selectedPattern.lastDimensions.toeSpring} / {selectedPattern.lastDimensions.heelSpring}mm
+                    </Text>
+                  </View>
+                  <View className={styles.detailRow}>
+                    <Text className={styles.detailLabel}>基准码</Text>
+                    <Text className={styles.detailValue}>{selectedPattern.lastDimensions.shoeSize}码</Text>
+                  </View>
+                </View>
+
+                <View className={styles.detailActions}>
+                  <Button className={styles.detailCopyBtn} onClick={() => handleDuplicate(selectedPattern)}>
+                    📋 复制为新版
+                  </Button>
+                  <Button className={styles.detailApplyBtn} onClick={() => { initEditState(selectedPattern); setIsEditing(true); }}>
+                    ✏️ 编辑
+                  </Button>
+                </View>
+
+                <View className={styles.detailActions}>
+                  <Button className={styles.detailApplyBtn} onClick={() => handleUse(selectedPattern)}>
+                    应用此版型
+                  </Button>
+                </View>
+
+                <Button className={styles.detailClose} onClick={() => { setSelectedPattern(null); setIsEditing(false); }}>
+                  关闭
+                </Button>
+              </>
+            )}
           </View>
         </View>
       )}
