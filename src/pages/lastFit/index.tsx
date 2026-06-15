@@ -28,16 +28,18 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const LastFitPage: React.FC = () => {
-  const { currentFoot, setCurrentFitResult } = useShoeStore();
+  const { currentFoot, currentFitResult, setCurrentFitResult, saveOrUpdateArchive, addRecentFoot } = useShoeStore();
 
   const fitResult = useMemo(() => {
+    if (currentFitResult) return currentFitResult;
     if (!currentFoot) return null;
     return performLastFit(currentFoot);
-  }, [currentFoot]);
+  }, [currentFoot, currentFitResult]);
 
   const handleSaveAndGrade = () => {
-    if (!fitResult) return;
+    if (!fitResult || !currentFoot) return;
     setCurrentFitResult(fitResult);
+    addRecentFoot(currentFoot);
     Taro.switchTab({ url: '/pages/grading/index' });
   };
 
@@ -48,7 +50,16 @@ const LastFitPage: React.FC = () => {
   const handleSaveArchive = () => {
     if (!currentFoot || !fitResult) return;
     setCurrentFitResult(fitResult);
-    Taro.showToast({ title: '已保存，可在档案页查看', icon: 'success' });
+    addRecentFoot(currentFoot);
+    const archive = saveOrUpdateArchive(currentFoot, fitResult);
+    const isNew = !archive.id || archive.createdAt === archive.updatedAt;
+    Taro.showToast({
+      title: isNew ? '已新建档案' : '已追加到档案',
+      icon: 'success'
+    });
+    setTimeout(() => {
+      Taro.switchTab({ url: '/pages/archive/index' });
+    }, 800);
   };
 
   if (!currentFoot) {

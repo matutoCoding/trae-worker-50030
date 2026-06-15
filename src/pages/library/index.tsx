@@ -10,7 +10,7 @@ import styles from './index.module.scss';
 const STYLE_FILTERS: (ShoeStyle | 'all')[] = ['all', 'oxford', 'derby', 'loafer', 'boot', 'monk', 'chelsea'];
 
 const LibraryPage: React.FC = () => {
-  const { patternLibrary, removeFromLibrary, incrementUsage, currentFoot, currentFitResult } = useShoeStore();
+  const { patternLibrary, removeFromLibrary, applyPattern, currentFoot, currentFitResult } = useShoeStore();
   const [activeFilter, setActiveFilter] = useState<ShoeStyle | 'all'>('all');
   const [selectedPattern, setSelectedPattern] = useState<PatternLibrary | null>(null);
 
@@ -20,9 +20,12 @@ const LibraryPage: React.FC = () => {
   }, [patternLibrary, activeFilter]);
 
   const handleUse = (pattern: PatternLibrary) => {
-    incrementUsage(pattern.id);
-    Taro.showToast({ title: '已应用，请在适配页查看', icon: 'success' });
+    applyPattern(pattern);
     setSelectedPattern(null);
+    Taro.showToast({ title: '版型已应用', icon: 'success' });
+    setTimeout(() => {
+      Taro.switchTab({ url: '/pages/lastFit/index' });
+    }, 800);
   };
 
   const handleDelete = (id: string) => {
@@ -59,7 +62,8 @@ const LibraryPage: React.FC = () => {
       createdAt: new Date().toISOString().split('T')[0],
       usageCount: 0
     };
-    useShoeStore.getState().addToLibrary(newPattern);
+    const { addToLibrary } = useShoeStore.getState();
+    addToLibrary(newPattern);
     Taro.showToast({ title: '已添加到版型库', icon: 'success' });
   };
 
@@ -198,6 +202,11 @@ const LibraryPage: React.FC = () => {
               </View>
             </View>
 
+            <View className={styles.detailActions}>
+              <Button className={styles.detailApplyBtn} onClick={() => selectedPattern && handleUse(selectedPattern)}>
+                应用此版型
+              </Button>
+            </View>
             <Button className={styles.detailClose} onClick={() => setSelectedPattern(null)}>
               关闭
             </Button>

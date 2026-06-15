@@ -13,18 +13,18 @@ const STYLE_OPTIONS: ShoeStyle[] = ['oxford', 'derby', 'loafer', 'boot', 'monk',
 const GENDER_OPTIONS: ('male' | 'female')[] = ['male', 'female'];
 
 const FootEntryPage: React.FC = () => {
-  const { archives, setCurrentFoot } = useShoeStore();
+  const { recentFoots, setCurrentFoot, addRecentFoot, currentFoot } = useShoeStore();
 
-  const [customerName, setCustomerName] = useState('');
-  const [footLength, setFootLength] = useState('');
-  const [ballGirth, setBallGirth] = useState('');
-  const [instepHeight, setInstepHeight] = useState('');
-  const [heelWidth, setHeelWidth] = useState('');
-  const [toeShape, setToeShape] = useState<ToeShape>('egyptian');
-  const [archType, setArchType] = useState<ArchType>('normal');
-  const [shoeStyle, setShoeStyle] = useState<ShoeStyle>('oxford');
-  const [gender, setGender] = useState<'male' | 'female'>('male');
-  const [notes, setNotes] = useState('');
+  const [customerName, setCustomerName] = useState(currentFoot?.customerName || '');
+  const [footLength, setFootLength] = useState(currentFoot ? String(currentFoot.footLength) : '');
+  const [ballGirth, setBallGirth] = useState(currentFoot ? String(currentFoot.ballGirth) : '');
+  const [instepHeight, setInstepHeight] = useState(currentFoot ? String(currentFoot.instepHeight) : '');
+  const [heelWidth, setHeelWidth] = useState(currentFoot ? String(currentFoot.heelWidth) : '');
+  const [toeShape, setToeShape] = useState<ToeShape>(currentFoot?.toeShape || 'egyptian');
+  const [archType, setArchType] = useState<ArchType>(currentFoot?.archType || 'normal');
+  const [shoeStyle, setShoeStyle] = useState<ShoeStyle>(currentFoot?.shoeStyle || 'oxford');
+  const [gender, setGender] = useState<'male' | 'female'>(currentFoot?.gender || 'male');
+  const [notes, setNotes] = useState(currentFoot?.notes || '');
 
   const handleSubmit = () => {
     if (!customerName.trim()) {
@@ -62,6 +62,7 @@ const FootEntryPage: React.FC = () => {
 
     console.info('[FootEntry] 保存脚型数据:', footData);
     setCurrentFoot(footData);
+    addRecentFoot(footData);
     Taro.showToast({ title: '录入成功', icon: 'success' });
     setTimeout(() => {
       Taro.switchTab({ url: '/pages/lastFit/index' });
@@ -95,9 +96,7 @@ const FootEntryPage: React.FC = () => {
     Taro.showToast({ title: '已加载历史数据', icon: 'success' });
   };
 
-  const recentFoots = archives
-    .flatMap(a => a.footMeasurements)
-    .slice(0, 5);
+  const displayRecentFoots = recentFoots.slice(0, 5);
 
   return (
     <ScrollView scrollY className={styles.page}>
@@ -106,10 +105,10 @@ const FootEntryPage: React.FC = () => {
         <Text className={styles.headerDesc}>录入客户脚型数据，为楦型适配提供精准依据</Text>
       </View>
 
-      {recentFoots.length > 0 && (
+      {displayRecentFoots.length > 0 && (
         <View className={styles.historySection}>
           <Text className={styles.cardTitle}>最近录入</Text>
-          {recentFoots.map((foot) => (
+          {displayRecentFoots.map((foot) => (
             <View
               key={foot.id}
               className={styles.historyCard}
