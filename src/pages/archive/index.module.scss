@@ -1,0 +1,287 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #F5EDE4 0%, $color-bg-page 100%);
+  padding-bottom: 120rpx;
+}
+
+.header {
+  padding: $spacing-lg $page-padding $spacing-md;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.headerCount {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.searchBar {
+  margin: 0 $page-padding $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.searchInput {
+  flex: 1;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  height: 72rpx;
+}
+
+.searchIcon {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+  margin-right: $spacing-sm;
+}
+
+.emptyState {
+  @include flex-center;
+  flex-direction: column;
+  padding-top: 200rpx;
+}
+
+.emptyIcon {
+  font-size: 80rpx;
+  margin-bottom: $spacing-lg;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
+.archiveList {
+  padding: 0 $page-padding;
+}
+
+.archiveCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.archiveHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.archiveName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.archiveDate {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.archiveBody {
+  margin-bottom: $spacing-md;
+}
+
+.archiveRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: $spacing-xs;
+}
+
+.archiveLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.archiveValue {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.warningTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  margin-top: $spacing-sm;
+}
+
+.warningTag {
+  font-size: $font-size-xs;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-round;
+  white-space: nowrap;
+}
+
+.warningTagHigh {
+  background: rgba($color-error, 0.1);
+  color: $color-error;
+}
+
+.warningTagMedium {
+  background: rgba($color-warning, 0.1);
+  color: $color-warning;
+}
+
+.warningTagLow {
+  background: rgba($color-primary, 0.1);
+  color: $color-primary;
+}
+
+.archiveFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  padding-top: $spacing-sm;
+  border-top: 1rpx solid $color-divider;
+}
+
+.archiveBtn {
+  @include button-reset;
+  height: 56rpx;
+  padding: 0 $spacing-md;
+  font-size: $font-size-sm;
+  border-radius: $radius-button;
+  transition: all $transition-base;
+  white-space: nowrap;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.archiveBtnView {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+}
+
+.archiveBtnDel {
+  background: rgba($color-error, 0.08);
+  color: $color-error;
+}
+
+.detailModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+}
+
+.detailContent {
+  width: 100%;
+  max-height: 80vh;
+  background: $color-bg-card;
+  border-radius: $radius-xl $radius-xl 0 0;
+  padding: $spacing-lg;
+  padding-bottom: calc(#{$spacing-lg} + env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+
+.detailHandle {
+  width: 60rpx;
+  height: 8rpx;
+  background: $color-border;
+  border-radius: 4rpx;
+  margin: 0 auto $spacing-lg;
+}
+
+.detailTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+}
+
+.detailSection {
+  margin-bottom: $spacing-lg;
+}
+
+.detailSectionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+  padding-left: $spacing-sm;
+  border-left: 4rpx solid $color-primary;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  padding: $spacing-xs 0;
+}
+
+.detailLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.detailValue {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.detailWarning {
+  padding: $spacing-sm;
+  background: rgba($color-error, 0.04);
+  border-radius: $radius-sm;
+  margin-bottom: $spacing-xs;
+  border-left: 4rpx solid $color-error;
+}
+
+.detailWarningText {
+  font-size: $font-size-sm;
+  color: $color-error;
+}
+
+.detailWarningSuggestion {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.detailClose {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: $color-tag-bg;
+  color: $color-text-secondary;
+  font-size: $font-size-md;
+  border-radius: $radius-button;
+  margin-top: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
